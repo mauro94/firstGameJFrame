@@ -47,6 +47,8 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
     private Image imaImagenGameOver;   // Imagen game over
     private String nombreArchivo;    //Nombre del archivo.
     private String[] arr;    //Arreglo del archivo divido.
+    private int iNumeroJuanitos;    //numero de fantasmas
+    private int iNumeroFantasmas;   //numero de juanitos
     
     
     /* objetos para manejar el buffer del Jframe y este no parpadee */
@@ -116,10 +118,10 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         lklJuanitos = new LinkedList();
         
         // genero un numero azar de 10 a 15
-        int iAzar = (int) (Math.random() * 6) + 10;
+        iNumeroJuanitos = (int) (Math.random() * 6) + 10;
        
         // genero cada juanito y lo añado a la lista
-        for (int iI = 0; iI < iAzar; iI ++) {
+        for (int iI = 0; iI < iNumeroJuanitos; iI ++) {
             // se crea el objeto para juanito
             Base basJuanito = new Base(iPosX,iPosY, WIDTH / iMAXANCHO,
                         HEIGHT / iMAXALTO,
@@ -142,10 +144,10 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         lklFantasmas = new LinkedList();
         
         // genero un numero azar de 8 a 10
-        iAzar = (int) (Math.random() * 3) + 8;
+        iNumeroFantasmas = (int) (Math.random() * 3) + 8;
        
         // genero cada fantasma y lo añado a la lista
-        for (int iI = 0; iI < iAzar; iI ++) {
+        for (int iI = 0; iI < iNumeroFantasmas; iI ++) {
             // se crea el objeto para fantasma
             Base basFantasma = new Base(iPosX,iPosY, WIDTH / iMAXANCHO,
                       HEIGHT / iMAXALTO,
@@ -554,6 +556,12 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         dato = fileIn.readLine();
         iPuntos = (Integer.parseInt(dato));
         
+        //definir pos. de nena
+        dato = fileIn.readLine();
+        basNena.getX();
+        dato = fileIn.readLine();
+        fileOut.println(basNena.getY());
+        
     	fileIn.close();
     }
 
@@ -573,11 +581,17 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         fileOut.println(basNena.getX());
         fileOut.println(basNena.getY());
         
+        //numero de juanitos
+        fileOut.println(iNumeroJuanitos);
+        
         // ciclo para guardar cada pos. juanito de la lista
         for (Base basJuanito : lklJuanitos) {
            fileOut.println(basJuanito.getX());
            fileOut.println(basJuanito.getY());
         }
+        
+        //numero de fantasmas
+        fileOut.println(iNumeroFantasmas);
         
         // ciclo para guardar cada pos. fantasma de la lista
         for (Base basFantasma : lklFantasmas) {
