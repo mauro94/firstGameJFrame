@@ -4,7 +4,7 @@
  * Juego en el que la changuita Nena debera de eliminar a los fantasmas 
  * y evitar a todos los juanitos!
  *
- * @author Mauro Amarante and
+ * @author Mauro Amarante and Diego Ponce
  * @version 2.0
  * @date 2015/2/11
  */
