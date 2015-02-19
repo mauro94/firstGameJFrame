@@ -6,7 +6,7 @@
  *
  * @author Mauro Amarante and Diego Ponce
  * @version 2.0
- * @date 2015/2/11
+ * @date 18/02/2015
  */
 
 package examenappjframe;
@@ -514,16 +514,16 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         else if(keyEvent.getKeyCode() == KeyEvent.VK_ESCAPE) {  
             bEscape = true;
         }
-        // si presiono la tecla c
-        else if(keyEvent.getKeyCode() == KeyEvent.VK_C) {  
+        // si presiono la tecla G
+        else if(keyEvent.getKeyCode() == KeyEvent.VK_G) {  
             try{
-                grabaArchivo();    //Graba el vector en el archivo.
+                guardaArchivo();    //Graba el vector en el archivo.
             }catch(IOException e){
                 System.out.println("Error en " + e.toString());
             }
         }
-        // si presiono la tecla v
-        else if(keyEvent.getKeyCode() == KeyEvent.VK_V) {  
+        // si presiono la tecla C
+        else if(keyEvent.getKeyCode() == KeyEvent.VK_C) {  
             try{
                 leeArchivo();    //Graba el vector en el archivo.
             }catch(IOException e){
@@ -532,74 +532,104 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         }
     }
     
-    /**
-    * Metodo que lee a informacion de un archivo y lo agrega a un vector.
-    *
-    * @throws IOException
-    */
-    public void leeArchivo() throws IOException{
-    	BufferedReader fileIn;
-    	try{
-    		fileIn = new BufferedReader(new FileReader(nombreArchivo));
-    	} catch (FileNotFoundException e){
-    		File puntos = new File(nombreArchivo);
-    		PrintWriter fileOut = new PrintWriter(puntos);
-    		fileOut.println("100,demo");
-    		fileOut.close();
-    		fileIn = new BufferedReader(new FileReader(nombreArchivo));
-    	}
-        //leer archivo
-        //vidas
-    	String dato = fileIn.readLine();
-        iVidas = (Integer.parseInt(dato));
-        //puntos
-        dato = fileIn.readLine();
-        iPuntos = (Integer.parseInt(dato));
-        
-        //definir pos. de nena
-        dato = fileIn.readLine();
-        basNena.getX();
-        dato = fileIn.readLine();
-        fileOut.println(basNena.getY());
-        
-    	fileIn.close();
-    }
-
-    /**
-     * Metodo que agrega la informacion del vector al archivo.
-     *
-     * @throws IOException
+    /*
+     * Guardar
+     * 
+     * Metodo sobrescrito de la clase <code>JFrame</code>,
+     * heredado de la clase Container.<P>
+     * En este metodo se guarda en un archivo de texto las posiciones y valores
+     * de todo el juego
+     * 
      */
-    public void grabaArchivo() throws IOException{
-    	PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));
-        
-        //grabar vidas y puntos
-        fileOut.println(iVidas);
-        fileOut.println(iPuntos);
-        
-        //grabar pos. de nena
-        fileOut.println(basNena.getX());
-        fileOut.println(basNena.getY());
-        
-        //numero de juanitos
-        fileOut.println(iNumeroJuanitos);
-        
-        // ciclo para guardar cada pos. juanito de la lista
-        for (Base basJuanito : lklJuanitos) {
-           fileOut.println(basJuanito.getX());
-           fileOut.println(basJuanito.getY());
+    public void guardaArchivo()  throws IOException{
+       PrintWriter prwArchivo = new PrintWriter(new 
+                                        FileWriter("savedgame.txt"));
+        prwArchivo.println(iVidas); //Se imprimen las vidas
+        prwArchivo.println(iPuntos); //Se imprime el score
+        prwArchivo.println(iDireccion); //Se imprime la direccion de chimp
+        prwArchivo.println(iVidas);//Se imprime la velocidad de juan
+        prwArchivo.println(iContadorJuanitos);//Se imprime la cantidad de colisiones
+        //Se imprime la posición de nena en la misma línea
+        prwArchivo.println(basNena.getX() + " " + basNena.getY());
+        //Se guarda la cantidad de caminadores y las posiciones
+        prwArchivo.println(lklJuanitos.size());
+        for (Base basMalo : lklJuanitos){
+            prwArchivo.println(basMalo.getX() + " " + basMalo.getY());
         }
-        
-        //numero de fantasmas
-        fileOut.println(iNumeroFantasmas);
-        
-        // ciclo para guardar cada pos. fantasma de la lista
-        for (Base basFantasma : lklFantasmas) {
-            fileOut.println(basFantasma.getX());
-            fileOut.println(basFantasma.getY());
+        //Se guarda la cantidad de corredores y las posiciones
+        prwArchivo.println(lklFantasmas.size());
+        for (Base basFantasmita : lklFantasmas){
+            prwArchivo.println(basFantasmita.getX() + " " + 
+                    basFantasmita.getY());
         }
-        
-    	fileOut.close();	
+        prwArchivo.close(); //Se cierra el archivo 
+    }
+    /*
+     * Cargar
+     * 
+     * Metodo sobrescrito de la clase <code>JFrame</code>,
+     * heredado de la clase Container.<P>
+     * En este metodo se carga de un archivo de texto, todas las posiciones
+     * de todo el juego
+     * 
+     */
+    public void leeArchivo() throws IOException{
+        BufferedReader brwEntrada; //Archivo entrada
+        try{
+            brwEntrada = new BufferedReader(new FileReader("savedgame.txt"));
+        } catch (FileNotFoundException e){
+            guardaArchivo();
+            brwEntrada = new BufferedReader(new FileReader("savedgame.txt"));
+        }
+        String sAux = ""; //Se inicializa un string auxiliar como vacío
+        //Se lee y carga la línea que contiene las vidas
+        iVidas = Integer.parseInt(brwEntrada.readLine()); 
+        //Se lee y carga la línea que contiene el score
+        iPuntos = Integer.parseInt(brwEntrada.readLine());
+        //Se lee y carga la línea que contiene la dirección
+        iDireccion = Integer.parseInt(brwEntrada.readLine());
+        //Se lee y carga la velocidad del juanito
+        iVidas = Integer.parseInt(brwEntrada.readLine());
+        //Se lee y carga la cantidad de colisiones hasta el momento
+        iContadorJuanitos = Integer.parseInt(brwEntrada.readLine());
+        //Se lee y carga si esta en pausa o no
+        bPausa = true;//Boolean.parseBoolean(brwEntrada.readLine());
+        //Se elimina el personaje Nena y se vuelve a crear
+        sAux = brwEntrada.readLine(); //Se lee la línea en una variable auxiliar
+        basNena.setX(Integer.parseInt(sAux.substring(0,sAux.indexOf(" "))));
+        basNena.setY(Integer.parseInt(sAux.substring(sAux.indexOf(" ")+1)));
+        //Se lee la cantidad de juanitos y se guarda en un auxiliar entero
+        lklJuanitos.clear(); //Se limpia la lista de Juanitos
+        lklJuanitos = new LinkedList(); //Se vuelve a crear la lista
+        int iAux = Integer.parseInt(brwEntrada.readLine());
+        for (int iI = 0; iI < iAux; iI ++){
+            sAux = brwEntrada.readLine();
+            URL urlImagenJuanito = this.getClass().
+                    getResource("juanito.gif");
+            //Se crea el personaje ya con las posiciones
+            Base basMalo = new Base(Integer.parseInt
+            (sAux.substring(0,sAux.indexOf(" "))),Integer.parseInt
+            (sAux.substring(sAux.indexOf(" ")+1)), getWidth() / iMAXANCHO,
+                    getHeight() / iMAXALTO, Toolkit.getDefaultToolkit().
+                                            getImage(urlImagenJuanito));
+            lklJuanitos.add(basMalo); //Se añade personaje a la lista
+        }
+        //Se lee la cantidad de corredores y se guarda en un auxiliar entero
+        lklFantasmas.clear(); //Se limpia la lista de corredores
+        lklFantasmas = new LinkedList(); //Se vuelve a crear la lista
+        iAux = Integer.parseInt(brwEntrada.readLine()); //Cambia el valor
+        for (int iI = 0; iI < iAux; iI++){
+            sAux = brwEntrada.readLine();
+            URL urlImagenFantasma = this.getClass().
+                    getResource("fantasmita.gif");
+            //Se crea el personaje corredor ya con las posiciones
+            Base basFantasmita = new Base(Integer.parseInt
+            (sAux.substring(0,sAux.indexOf(" "))), Integer.parseInt
+            (sAux.substring(sAux.indexOf(" ")+1)),getWidth() / iMAXANCHO,
+                getHeight() / iMAXALTO, Toolkit.getDefaultToolkit().
+                                            getImage(urlImagenFantasma));
+            lklFantasmas.add(basFantasmita); //Se añade corredor a la lista
+        }
     }
     
     /**
