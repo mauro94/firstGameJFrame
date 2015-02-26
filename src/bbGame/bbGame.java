@@ -1,15 +1,15 @@
 /**
  * Juego
  *
- * Juego en el que la changuita Nena debera de eliminar a los fantasmas 
+ * Juego en el que la changuita Barra debera de eliminar a los fantasmas 
  * y evitar a todos los juanitos!
  *
- * @author Mauro Amarante and Diego Ponce
+ * @author Diego Ponce and Viridiana 
  * @version 2.0
  * @date 18/02/2015
  */
 
-package examenappjframe;
+package bbgame;
 
 import javax.swing.JFrame;
 import java.awt.Font;
@@ -29,33 +29,32 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.LinkedList;
 
-public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
+public class bbGame extends JFrame implements Runnable, KeyListener {
 
     private final int iMAXANCHO = 10; // maximo numero de personajes por ancho
     private final int iMAXALTO = 8;  // maxuimo numero de personajes por alto
-    private Base basNena;         // Objeto de la clase base
-    private LinkedList<Base> lklJuanitos;    //Lista de objetos de la clase Base
-    private LinkedList<Base> lklFantasmas;    //Lista de objetos de la clase Base
+    private Base basBarra;         // Objeto de la clase base
+    private LinkedList<Base> lklBarriles;    //Lista de objetos de la clase Base
     private int iVidas;     //numero de vidas
     private int iPuntos;    //numero de puntos acumulados
     private int iDireccion; //define la direccion del movimiento
-    private int iContadorJuanitos;  //cuenta la colision de juanitos con Nena
+    private int iContadorBarriles;  //cuenta la colision de juanitos con Barra
     private boolean bPausa; //pausa para el juego
+    private boolean bGameStarted;  //Booleana para saber si el juego comenzó o no
     private boolean bEscape;    //escape termina el juego
-    private static final int WIDTH = 800;    //Ancho del JFrame
-    private static final int HEIGHT = 500;    //Alto del JFrame
+    private static final int WIDTH = 550;    //Ancho del JFrame
+    private static final int HEIGHT = 700;    //Alto del JFrame
+    private Image imaImagenInicio;   // Imagen game over
     private Image imaImagenGameOver;   // Imagen game over
     private String nombreArchivo;    //Nombre del archivo.
     private String[] arr;    //Arreglo del archivo divido.
-    private int iNumeroJuanitos;    //numero de fantasmas
-    private int iNumeroFantasmas;   //numero de juanitos
+    private int iNumeroBarriles;    //numero de fantasmas
     
     
     /* objetos para manejar el buffer del Jframe y este no parpadee */
     private Image    imaImagenApplet;   // Imagen a proyectar en JFrame
     private Graphics graGraficaApplet;  // Objeto grafico de la Imagen
-    private SoundClip adcSonidoJuanito;   // Objeto sonido de Juanito
-    private SoundClip adcSonidoFantasma;   // Objeto sonido de Fantasma
+    private SoundClip adcSonidoBarril;   // Objeto sonido de Juanito
     
     /** 
      * ExamenAppJFrame
@@ -65,7 +64,10 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
      * <code>ExamenAppJFrame</code>
      * 
      */
-    public ExamenAppJFrame() {        
+    public bbGame() {        
+        //inicializamos la variable que checa si ya empezó el juego en falso.
+        bGameStarted = false;
+        
         //Se define el nuero de vidas entre 3 y 5 de la changuita
         iVidas = (int) (Math.random() * 3) + 3;
         
@@ -76,7 +78,7 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         iDireccion = -1;
         
         //se inicia contador en 0
-        iContadorJuanitos = 0;
+        iContadorBarriles = 0;
         
         //se inicia sin pausa el juego
         bPausa = false;
@@ -87,85 +89,60 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         //nombrar archivo 
         nombreArchivo = "SaveJuego.txt";
         
+        //definir imagen de Inicio del juego
+        URL urlImagenInicio = this.getClass().getResource("start.png");
+        imaImagenInicio = Toolkit.getDefaultToolkit().getImage(urlImagenInicio);
+        
         //definir imagen de game over
         URL urlImagenGameOver = this.getClass().getResource("gameOver.gif");
         imaImagenGameOver = Toolkit.getDefaultToolkit().getImage(urlImagenGameOver);
         
-        // se posiciona Nena
- 	int iPosX = (int) (Math.random() *(WIDTH / 4)) + WIDTH / 2;    
+        // se posiciona Barra
+    int iPosX = (int) (Math.random() *(WIDTH / 4)) + WIDTH / 2;    
         int iPosY = (int) (Math.random() *(HEIGHT / 4)) + HEIGHT / 2;
         
-        //Definir imagenen para Nena
-	URL urlImagenNena = this.getClass().getResource("chimpy.gif");
+        //Definir imagenen para Barra
+    URL urlImagenBarra = this.getClass().getResource("barra.png");
                 
-        //se crea el objeto para Nena
-	basNena = new Base(iPosX, iPosY, WIDTH / iMAXANCHO,
-              	  HEIGHT / iMAXALTO,
-                	Toolkit.getDefaultToolkit().getImage(urlImagenNena));
+        //se crea el objeto para Barra
+    basBarra = new Base(iPosX, iPosY, WIDTH / iMAXANCHO,
+                  HEIGHT / iMAXALTO,
+                    Toolkit.getDefaultToolkit().getImage(urlImagenBarra));
         
-        //se reposiciona a Nena  en el piso del Applet y al centro
-        basNena.setX(WIDTH / 2 - basNena.getAncho() / 2);
-        basNena.setY(HEIGHT / 2 - basNena.getAlto() / 2);
+        //se reposiciona a Barra  en el piso del Applet y al centro
+        basBarra.setX(WIDTH / 2 - basBarra.getAncho() / 2);
+        basBarra.setY(HEIGHT / 1 - basBarra.getAlto() / 2);
         
         //defino la imagen de los Juanitos
-        URL urlImagenJuanito = this.getClass().getResource("juanito.gif");
+        URL urlImagenBarril = this.getClass().getResource("barril.png");
         
         // se posiciona a Juanito 
         iPosX = (iMAXANCHO - 1) * WIDTH / iMAXANCHO;
         iPosY = (iMAXALTO - 1) * HEIGHT / iMAXALTO;    
         
         //se crea la lista de juanitos
-        lklJuanitos = new LinkedList();
+        lklBarriles = new LinkedList();
         
         // genero un numero azar de 10 a 15
-        iNumeroJuanitos = (int) (Math.random() * 6) + 10;
+        iNumeroBarriles = (int) (Math.random() * 6) + 10;
        
         // genero cada juanito y lo añado a la lista
-        for (int iI = 0; iI < iNumeroJuanitos; iI ++) {
+        for (int iI = 0; iI < iNumeroBarriles; iI ++) {
             // se crea el objeto para juanito
-            Base basJuanito = new Base(iPosX,iPosY, WIDTH / iMAXANCHO,
+            Base basBarril = new Base(iPosX,iPosY, WIDTH / iMAXANCHO,
                         HEIGHT / iMAXALTO,
-                        Toolkit.getDefaultToolkit().getImage(urlImagenJuanito));
-            basJuanito.setX((int) (Math.random() * 
-                                    (WIDTH - basJuanito.getAncho())));   
-            basJuanito.setY(-basJuanito.getAlto() + 
+                        Toolkit.getDefaultToolkit().getImage(urlImagenBarril));
+            basBarril.setX((int) (Math.random() * 
+                                    (WIDTH - basBarril.getAncho())));   
+            basBarril.setY(-basBarril.getAlto() + 
                                 -((int) (Math.random() * HEIGHT)));
-            lklJuanitos.add(basJuanito);
+            lklBarriles.add(basBarril);
         }
         
-        // defino la imagen de los fantasmas
-	URL urlImagenFantasma = this.getClass().getResource("fantasmita.gif");
         
-        // se posiciona a fantasma 
-        iPosX = (iMAXANCHO - 1) * WIDTH / iMAXANCHO;
-        iPosY = (iMAXALTO - 1) * HEIGHT / iMAXALTO;    
-        
-        //se crea la lista de fantasmas
-        lklFantasmas = new LinkedList();
-        
-        // genero un numero azar de 8 a 10
-        iNumeroFantasmas = (int) (Math.random() * 3) + 8;
-       
-        // genero cada fantasma y lo añado a la lista
-        for (int iI = 0; iI < iNumeroFantasmas; iI ++) {
-            // se crea el objeto para fantasma
-            Base basFantasma = new Base(iPosX,iPosY, WIDTH / iMAXANCHO,
-                      HEIGHT / iMAXALTO,
-                      Toolkit.getDefaultToolkit().getImage(urlImagenFantasma));
-            basFantasma.setX(-basFantasma.getAncho() + 
-                                -((int) (Math.random() * WIDTH)));   
-            basFantasma.setY((int) (Math.random() * 
-                                   (HEIGHT - basFantasma.getAlto() - 25)) + 25);
-            lklFantasmas.add(basFantasma);
-        }
-	
-        //Creo el sonido de colision entre juanito y Nena
-        URL urlSonidoJuanito = this.getClass().getResource("monkey1.wav");
-        adcSonidoJuanito = new SoundClip("monkey1.wav");
-        
-        //Creo el sonido de colision entre fantasma y Nena
-        URL urlSonidoFantasma = this.getClass().getResource("monkey2.wav");
-        adcSonidoFantasma = new SoundClip("monkey2.wav");
+        //Creo el sonido de colision entre juanito y Barra
+        URL urlSonidoBarril = this.getClass().getResource("rebote.wav");
+        adcSonidoBarril = new SoundClip("rebote.wav");
         
         /* se le añade la opcion al JFrame de ser escuchado por los eventos
            del teclado  */
@@ -197,7 +174,7 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
                 checaColision();
             }
             repaint();
-            try	{
+            try {
                 // El thread se duerme.
                 Thread.sleep (20);
             }
@@ -215,41 +192,27 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
      * 
      */
     public void actualiza() {
-        //Dependiendo de la iDireccion de Nena es hacia donde se mueve.
+        //Dependiendo de la iDireccion de Barra es hacia donde se mueve.
         switch (iDireccion) {
-            case 1: { //se mueve hacia arriba
-                basNena.setY(basNena.getY() - 3);
-                break;    
+            case 1: { //se mueve hacia la izquierda
+                basBarra.setX(basBarra.getX() - 5);
+                break;   
             }
-            case 2: { //se mueve hacia abajo
-                basNena.setY(basNena.getY() + 3);
+            case 2: { //se mueve hacia la derecha
+                basBarra.setX(basBarra.getX() + 5);
                 break;    
-            }
-            case 3: { //se mueve hacia izquierda
-                basNena.setX(basNena.getX() - 3);
-                break;    
-            }
-            case 4: { //se mueve hacia derecha
-                basNena.setX(basNena.getX() + 3);
-                break;    	
             }
         }
         
         // ciclo para mover cada juanito de la lista
-        for (Base basJuanito : lklJuanitos) {
+        for (Base basBarril : lklBarriles) {
             //velocidad definida y se acelera dependiendo de las vidas
             int iVelocidad = 6 - iVidas;
-            basJuanito.setY(basJuanito.getY() + iVelocidad);
+            basBarril.setY(basBarril.getY() + iVelocidad);
         }
         
-        // ciclo para mover cada fantasma de la lista
-        for (Base basFantasma : lklFantasmas) {
-            // genero un numero azar de 3 a 5
-            int iAzar = (int) (Math.random() * 3) + 3;
-            basFantasma.setX(basFantasma.getX() + iAzar);
-        }
     }
-	
+    
     /**
      * checaColision
      * 
@@ -257,77 +220,55 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
      * 
      */
     public void checaColision() {
-        //Colision de Nena con el JFrame dependiendo a donde se mueve.
-        //Nena colisiona con el lado izquierdo
-        if (basNena.getX() < 0) {
-            basNena.setX(0);    //Nena no sale
+        //Colision de Barra con el JFrame dependiendo a donde se mueve.
+        //Barra colisiona con el lado izquierdo
+        if (basBarra.getX() < 0) {
+            basBarra.setX(0);    //Barra no sale
         }
-        //Nena esta colisionando con el lado derecho
-        if (basNena.getX() + basNena.getAncho() > WIDTH) {
-            basNena.setX(WIDTH - basNena.getAncho()); /*Nena
+        //Barra esta colisionando con el lado derecho
+        if (basBarra.getX() + basBarra.getAncho() > WIDTH) {
+            basBarra.setX(WIDTH - basBarra.getAncho()); /*Barra
                                                                 no sale*/
         }
-        //Nena esta colsionando con el lado superior
-        if (basNena.getY() < 25) { 
-            basNena.setY(25);     //Nena no sale
+        //Barra esta colsionando con el lado superior
+        if (basBarra.getY() < 25) { 
+            basBarra.setY(25);     //Barra no sale
         }
-        //Nena esta colisionando con el lado inferior
-        if (basNena.getY() + basNena.getAlto() > HEIGHT) { 
-            basNena.setY(HEIGHT - basNena.getAlto()); /*Nena
+        //Barra esta colisionando con el lado inferior
+        if (basBarra.getY() + basBarra.getAlto() > HEIGHT) { 
+            basBarra.setY(HEIGHT - basBarra.getAlto()); /*Barra
                                                                no sale*/
         }
         
         // ciclo para revisar colision de los juanitos
-        for (Base basJuanito : lklJuanitos) {
-            //checo la colision con Nena
-            if (basNena.intersecta(basJuanito)) {
+        for (Base basBarril : lklBarriles) {
+            //checo la colision con Barra
+            if (basBarra.intersecta(basBarril)) {
                 //Reubicar a juanito
-                basJuanito.setX((int) (Math.random() * 
-                                    (WIDTH - basJuanito.getAncho())));   
-                basJuanito.setY(-basJuanito.getAlto() + 
+                basBarril.setX((int) (Math.random() * 
+                                    (WIDTH - basBarril.getAncho())));   
+                basBarril.setY(-basBarril.getAlto() + 
                                 -((int) (Math.random() * HEIGHT)));  
                 //se suma una colision al contador
-                iContadorJuanitos++;
+                iContadorBarriles++;
                 //si ya colisionaron 5
-                if (iContadorJuanitos >= 5) {
+                if (iContadorBarriles >= 5) {
                     iVidas--;   //se resta una vida
-                    iContadorJuanitos = 0;
+                    iContadorBarriles = 0;
                 }
-                adcSonidoJuanito.play(); //sonido al colisionar con Nena
+                adcSonidoBarril.play(); //sonido al colisionar con Barra
             }
             
             //si colisiono con la parte de abajo del JFrame
-            if ((basJuanito.getY() + basJuanito.getAlto()) > HEIGHT) {
+            if ((basBarril.getY() + basBarril.getAlto()) > HEIGHT) {
                 //Reubicar a juanito
-                basJuanito.setX((int) (Math.random() * 
-                                    (WIDTH - basJuanito.getAncho())));   
-                basJuanito.setY(-basJuanito.getAlto() + 
+                basBarril.setX((int) (Math.random() * 
+                                    (WIDTH - basBarril.getAncho())));   
+                basBarril.setY(-basBarril.getAlto() + 
                                 -((int) (Math.random() * HEIGHT)));      
             }
         }
         
-        // ciclo para revisar colision de los fantasmas
-        for (Base basFantasma : lklFantasmas) {
-            //checo la colision con Nena
-            if (basNena.intersecta(basFantasma)) {
-                //Reubicar al fantasma
-                basFantasma.setX(-basFantasma.getAncho() + 
-                                         -((int) (Math.random() * WIDTH))); 
-                basFantasma.setY((int) (Math.random() * 
-                                   (HEIGHT - basFantasma.getAlto() - 25)) + 25);     
-                iPuntos++;   //Al colisionar se aumenta 1 punto
-                adcSonidoFantasma.play(); //sonido al colisionar con Nena
-            }
-            
-            //cehoco si colisiono con el lado derecho
-            if ((basFantasma.getX() + basFantasma.getAncho()) > WIDTH) {
-                //Reubicar al fantasma
-                basFantasma.setX(-basFantasma.getAncho() + 
-                                         -((int) (Math.random() * WIDTH))); 
-                basFantasma.setY((int) (Math.random() * 
-                                    (HEIGHT - basFantasma.getAlto())));     
-            }
-        }
     }
     
     /**
@@ -344,6 +285,7 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
      * 
      */
     public void paint(Graphics graGrafico) {
+        
         // Inicializan el DoubleBuffer
         if (imaImagenApplet == null){
             imaImagenApplet = createImage (this.getSize().width, 
@@ -352,7 +294,7 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         }
         
         // Actualiza la imagen de fondo.
-        URL urlImagenFondo = this.getClass().getResource("Ciudad.png");
+        URL urlImagenFondo = this.getClass().getResource("fondo.png");
         Image imaImagenFondo = Toolkit.getDefaultToolkit().getImage(urlImagenFondo);
          graGraficaApplet.drawImage(imaImagenFondo, 0, 0, WIDTH, HEIGHT, this);
         
@@ -377,22 +319,19 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
      */
     public void paint1 (Graphics graDibujo) {
         //Si todavia hay vidas en el juego o no ESCAPE
+        
+        
+        
         if (iVidas > 0 && !bEscape) {
             // si la imagen ya se cargo
-            if (basNena != null && lklJuanitos != null && lklFantasmas != null) {
+            if (basBarra != null && lklBarriles != null) {
                 //Dibuja la imagen de principal en el JFrame
-                basNena.paint(graDibujo, this);
+                basBarra.paint(graDibujo, this);
 
                 // pinto cada Juanito de la lista
-                for (Base basJuanito : lklJuanitos) {
+                for (Base basBarril : lklBarriles) {
                     //Dibuja la imagen de juanito en el JFrame
-                    basJuanito.paint(graDibujo, this);
-                }
-
-                // pinto cada fantasma de la lista
-                for (Base basFantasma : lklFantasmas) {
-                    //Dibuja la imagen de juanito en el JFrame
-                    basFantasma.paint(graDibujo, this);
+                    basBarril.paint(graDibujo, this);
                 }
 
                 //Dibujar vidas restantes
@@ -407,7 +346,7 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
 
             } // sino se ha cargado se dibuja un mensaje 
             else {
-                //Da un mensaje mientras se carga el dibujo	
+                //Da un mensaje mientras se carga el dibujo 
                 graDibujo.drawString("No se cargo la imagen..", 20, 20);
             }
         }
@@ -458,21 +397,13 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
      * 
      */
     public void keyPressed(KeyEvent keyEvent) {
-        // si presiono la tecla W
-        if(keyEvent.getKeyCode() == KeyEvent.VK_W) {
+        // si presiono la tecla A
+        if(keyEvent.getKeyCode() == KeyEvent.VK_A || keyEvent.getKeyCode() == KeyEvent.VK_LEFT) {    
             iDireccion = 1;
         }
-        // si presiono la tecla S
-        else if(keyEvent.getKeyCode() == KeyEvent.VK_S) {  
-            iDireccion = 2;
-        }
-        // si presiono la tecla A
-        else if(keyEvent.getKeyCode() == KeyEvent.VK_A) {    
-            iDireccion = 3;
-        }
         // si presiono la tecla D
-        else if(keyEvent.getKeyCode() == KeyEvent.VK_D) {    
-            iDireccion = 4;
+        else if(keyEvent.getKeyCode() == KeyEvent.VK_D || keyEvent.getKeyCode() == KeyEvent.VK_RIGHT) {    
+            iDireccion = 2;
         }
     }
 
@@ -485,24 +416,17 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
      * 
      */
     public void keyReleased(KeyEvent keyEvent) {
-        // si presiono la tecla W
-        if(keyEvent.getKeyCode() == KeyEvent.VK_W) {
-            iDireccion = 1;
-        }
-        // si presiono la tecla S
-        else if(keyEvent.getKeyCode() == KeyEvent.VK_S) {  
-            iDireccion = 2;
-        }
+        
         // si presiono la tecla A
-        else if(keyEvent.getKeyCode() == KeyEvent.VK_A) {    
-            iDireccion = 3;
+        if(keyEvent.getKeyCode() == KeyEvent.VK_A || keyEvent.getKeyCode() == KeyEvent.VK_LEFT) {    
+            iDireccion = -1;
         }
         // si presiono la tecla D
-        else if(keyEvent.getKeyCode() == KeyEvent.VK_D) {    
-            iDireccion = 4;
+        else if(keyEvent.getKeyCode() == KeyEvent.VK_D || keyEvent.getKeyCode() == KeyEvent.VK_RIGHT) {    
+            iDireccion = -1;
         }
         // si presiono la tecla P
-        else if(keyEvent.getKeyCode() == KeyEvent.VK_P) {  
+        if(keyEvent.getKeyCode() == KeyEvent.VK_P) {  
             if (!bPausa) {
                 bPausa = true;
             }
@@ -548,20 +472,15 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         prwArchivo.println(iPuntos); //Se imprime el score
         prwArchivo.println(iDireccion); //Se imprime la direccion de chimp
         prwArchivo.println(iVidas);//Se imprime la velocidad de juan
-        prwArchivo.println(iContadorJuanitos);//Se imprime la cantidad de colisiones
-        //Se imprime la posición de nena en la misma línea
-        prwArchivo.println(basNena.getX() + " " + basNena.getY());
+        prwArchivo.println(iContadorBarriles);//Se imprime la cantidad de colisiones
+        //Se imprime la posición de Barra en la misma línea
+        prwArchivo.println(basBarra.getX() + " " + basBarra.getY());
         //Se guarda la cantidad de caminadores y las posiciones
-        prwArchivo.println(lklJuanitos.size());
-        for (Base basMalo : lklJuanitos){
+        prwArchivo.println(lklBarriles.size());
+        for (Base basMalo : lklBarriles){
             prwArchivo.println(basMalo.getX() + " " + basMalo.getY());
         }
-        //Se guarda la cantidad de corredores y las posiciones
-        prwArchivo.println(lklFantasmas.size());
-        for (Base basFantasmita : lklFantasmas){
-            prwArchivo.println(basFantasmita.getX() + " " + 
-                    basFantasmita.getY());
-        }
+        
         prwArchivo.close(); //Se cierra el archivo 
     }
     /*
@@ -591,45 +510,30 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
         //Se lee y carga la velocidad del juanito
         iVidas = Integer.parseInt(brwEntrada.readLine());
         //Se lee y carga la cantidad de colisiones hasta el momento
-        iContadorJuanitos = Integer.parseInt(brwEntrada.readLine());
+        iContadorBarriles = Integer.parseInt(brwEntrada.readLine());
         //Se lee y carga si esta en pausa o no
         bPausa = true;//Boolean.parseBoolean(brwEntrada.readLine());
-        //Se elimina el personaje Nena y se vuelve a crear
+        //Se elimina el personaje Barra y se vuelve a crear
         sAux = brwEntrada.readLine(); //Se lee la línea en una variable auxiliar
-        basNena.setX(Integer.parseInt(sAux.substring(0,sAux.indexOf(" "))));
-        basNena.setY(Integer.parseInt(sAux.substring(sAux.indexOf(" ")+1)));
+        basBarra.setX(Integer.parseInt(sAux.substring(0,sAux.indexOf(" "))));
+        basBarra.setY(Integer.parseInt(sAux.substring(sAux.indexOf(" ")+1)));
         //Se lee la cantidad de juanitos y se guarda en un auxiliar entero
-        lklJuanitos.clear(); //Se limpia la lista de Juanitos
-        lklJuanitos = new LinkedList(); //Se vuelve a crear la lista
+        lklBarriles.clear(); //Se limpia la lista de Juanitos
+        lklBarriles = new LinkedList(); //Se vuelve a crear la lista
         int iAux = Integer.parseInt(brwEntrada.readLine());
         for (int iI = 0; iI < iAux; iI ++){
             sAux = brwEntrada.readLine();
-            URL urlImagenJuanito = this.getClass().
+            URL urlImagenBarril = this.getClass().
                     getResource("juanito.gif");
             //Se crea el personaje ya con las posiciones
             Base basMalo = new Base(Integer.parseInt
             (sAux.substring(0,sAux.indexOf(" "))),Integer.parseInt
             (sAux.substring(sAux.indexOf(" ")+1)), getWidth() / iMAXANCHO,
                     getHeight() / iMAXALTO, Toolkit.getDefaultToolkit().
-                                            getImage(urlImagenJuanito));
-            lklJuanitos.add(basMalo); //Se añade personaje a la lista
+                                            getImage(urlImagenBarril));
+            lklBarriles.add(basMalo); //Se añade personaje a la lista
         }
-        //Se lee la cantidad de corredores y se guarda en un auxiliar entero
-        lklFantasmas.clear(); //Se limpia la lista de corredores
-        lklFantasmas = new LinkedList(); //Se vuelve a crear la lista
-        iAux = Integer.parseInt(brwEntrada.readLine()); //Cambia el valor
-        for (int iI = 0; iI < iAux; iI++){
-            sAux = brwEntrada.readLine();
-            URL urlImagenFantasma = this.getClass().
-                    getResource("fantasmita.gif");
-            //Se crea el personaje corredor ya con las posiciones
-            Base basFantasmita = new Base(Integer.parseInt
-            (sAux.substring(0,sAux.indexOf(" "))), Integer.parseInt
-            (sAux.substring(sAux.indexOf(" ")+1)),getWidth() / iMAXANCHO,
-                getHeight() / iMAXALTO, Toolkit.getDefaultToolkit().
-                                            getImage(urlImagenFantasma));
-            lklFantasmas.add(basFantasmita); //Se añade corredor a la lista
-        }
+       
     }
     
     /**
@@ -639,7 +543,7 @@ public class ExamenAppJFrame extends JFrame implements Runnable, KeyListener {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        ExamenAppJFrame juego = new ExamenAppJFrame();
+        bbGame juego = new bbGame();
         juego.setSize(WIDTH, HEIGHT);
         juego.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         juego.setVisible(true);
